@@ -1,27 +1,28 @@
 package com.Project1.ChatApplication.Security.SecurityController;
 
 import com.Project1.ChatApplication.Security.Jwt.JwtFilterServiceClass;
-import com.Project1.ChatApplication.Security.OtpVerification.Service.OtpVerificationServiceClass;
+
 import com.Project1.ChatApplication.Security.PhoneUtil.PhoneNumberFormatter;
 import com.Project1.ChatApplication.Security.SecurityService.NewUserService;
 import com.Project1.ChatApplication.Security.UserIdGeneration.USerIdUtilMethods;
+import com.Project1.ChatApplication.Security.UserIdGeneration.UserIdPojoClass;
 import com.Project1.ChatApplication.Security.UserPojo.UserSecurityPojoClass;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "${app.cors.allowed-origins}",allowCredentials = "true")
 public class SecurityControllerClass {
 @Autowired
 private NewUserService newEntry;
@@ -29,64 +30,100 @@ private NewUserService newEntry;
     AuthenticationManager authenticationManager;
 @Autowired
 JwtFilterServiceClass jwt;
-@Autowired
- private OtpVerificationServiceClass otpService;
+
 @Autowired
  private USerIdUtilMethods getUserId;
 
 PhoneNumberFormatter Numberformatter=new PhoneNumberFormatter();
 
-    @GetMapping("/greet") //Demo greet Method:
-    public String DemoGreet(){
-        return  "Hello user,Welcome to my chat app:";
+    @GetMapping("/authenticatingJwtToken") //Demo greet Method:
+    public ResponseEntity<Object> DemoGreet(){
+
+        return ResponseEntity.ok(Map.of("IsAuthenticated","Jwt is authenticated:"));
     }
 
 
       @PostMapping("/login") //user Login Method:
     public ResponseEntity<?> UserLogin(@RequestBody UserSecurityPojoClass user, HttpServletResponse response) {
 
-          String formatter = Numberformatter.numberFormatter(user);
-          if (formatter.equals("Please enter all credentials:") || formatter.equals("Numbers Can't contains other values:"))
-              return ResponseEntity.status(401).body(formatter);
+          String formatter = Numberformatter.authenticateMobileNumber(user);
+          if (formatter == null)
+              return ResponseEntity.status(401).body(Map.of("message", "Invalid or Empty Credentials"));
           else {
-              Authentication authorized = authenticationManager
-                      .authenticate(new UsernamePasswordAuthenticationToken(formatter, user.getPassword()));
+              try {
 
-              if (authorized.isAuthenticated()) {
-                               Map<String,Object> userDetails=getUserId.getUserID(formatter);
 
-                      String token =jwt.getJwtTokens(formatter,userDetails.get("UserId").toString(),(boolean)(userDetails.get("FirstLogin")));
-                      Cookie cookie=new Cookie("jwt",token);
-                      cookie.setHttpOnly(true);
-                      cookie.setSecure(true);
-                      cookie.setPath("/");
-                      cookie.setMaxAge(60*60);
-                      response.addCookie(cookie);
+                  Authentication authorized = authenticationManager
+                          .authenticate(new UsernamePasswordAuthenticationToken(formatter, user.getPassword()));
 
-                  return ResponseEntity.ok("WelcomeBack User:");
-              } else {
-                  return ResponseEntity.status(401).body("Invalid User,Authorize denied:");
+                  if (authorized.isAuthenticated()) {
+                      Map<String, Object> userDetails = getUserId.getUserID(formatter);
+
+                      String token = jwt.getJwtTokens(formatter, userDetails.get("UserId").toString());
+//                      Cookie cookie = new Cookie("jwt", token);
+//                      cookie.setHttpOnly(true);
+//                      cookie.setSecure(false);
+//                      cookie.setPath("/");
+//                      cookie.setMaxAge(60 * 60);
+                      response.setHeader("Set-Cookie",
+                              "jwt=" + token +
+                                      "; Path=/" +
+                                      "; Max-Age=3600" +
+                                      "; HttpOnly" +
+                                      "; SameSite=Lax"
+                              // ✅ No Secure flag — works on HTTP localhost
+                      );
+                        UserIdPojoClass firstLogin=getUserId.isFirstLogin(formatter);
+                        if(firstLogin==null)return ResponseEntity.ok(Map.of("message", "WelcomeBack User:","firstLogin",false,"currentUserID",userDetails.get("UserId").toString()));
+                      else{
+                          firstLogin.setFirstlogin(false);
+                          boolean confirmation=getUserId.updatedUserID(firstLogin);
+                          if(confirmation) return ResponseEntity.ok(Map.of("message","welcome User to the Chatrix App:","firstLogin",true));
+                          return   ResponseEntity.status(500).body(Map.of("message","Something wrong with first login:"));
+                        }
+
+                  } else {
+                      return ResponseEntity.status(401).body(Map.of("message", "Invalid User,Authorize denied:"));
+                  }
+              }catch(BadCredentialsException e){
+
+                  return  ResponseEntity.status(401).body(Map.of("message","Wrong MobileNo or Password:"));
               }
           }
       }
-
 @PostMapping("/register") //User Register Method:
 public ResponseEntity<?> UserRegister(@RequestBody UserSecurityPojoClass newUserData)  {
+
+
+
+
     return  newEntry.addNewUser(newUserData);
     }
+@GetMapping("/getCurrentUserId")
+    public  ResponseEntity<Object> currentUserID(){
+        return ResponseEntity.ok(Map.of("currentUserID",getUserId.extractUserIdFromJwtToken()));
+    }
+@PostMapping("/userLogout")
+    public ResponseEntity<Map<String,String>> userLogout(HttpServletResponse response){
+        try {
 
-@PostMapping("/forgotpassword/generateotp")
-    public String updatePassword(@RequestBody UserSecurityPojoClass phonenumber){
+            ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .sameSite("Lax")
+                    .maxAge(0)
+                    .build();
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            return ResponseEntity.ok(Map.of("message", "user logout is  a success:"));
+        }catch (Exception e){
 
+            return null;
+        }
 
-    return  otpService.otpGeneration(phonenumber);
 }
-@PostMapping("/forgotpassword/validatingotp")
-    public String validatingOtp(@RequestBody Map<String,String>otpDetails)throws  Exception{
 
 
-        return otpService.otpValidation(otpDetails);
-}
 }
 
 

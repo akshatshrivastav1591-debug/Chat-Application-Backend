@@ -29,7 +29,8 @@ dependencies {
 	implementation("me.paulschwarz:springboot4-dotenv:5.1.0")
 	implementation("com.googlecode.libphonenumber:libphonenumber:9.0.23")
 	implementation("com.cloudinary:cloudinary-http5:2.0.0")
-	implementation("com.twilio.sdk:twilio:11.3.4")
+	implementation ("org.springframework.boot:spring-boot-starter-mail")
+
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")

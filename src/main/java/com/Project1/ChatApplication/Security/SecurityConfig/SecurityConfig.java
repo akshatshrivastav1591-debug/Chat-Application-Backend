@@ -5,6 +5,7 @@ import com.Project1.ChatApplication.Security.SecurityService.UserSecurityService
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -28,7 +34,8 @@ public class SecurityConfig {
     @Autowired
     JwtFilterClass jwtFilter;
 
-
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
 
 
 
@@ -36,7 +43,7 @@ public class SecurityConfig {
     public AuthenticationProvider authProvider(){
         DaoAuthenticationProvider provider=new DaoAuthenticationProvider(User);
         provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
-        System.out.println("Authentication Provider Method is Working");
+
         return  provider;
     }
 
@@ -48,8 +55,8 @@ public AuthenticationManager authenticationManager(AuthenticationConfiguration c
 @Bean
 public SecurityFilterChain securityFilterChain (HttpSecurity http){
         http.csrf(customizer->customizer.disable());
-        http.cors(cors->{});
-        http.authorizeHttpRequests(request->request.requestMatchers("/register","/login","/forgotpassword/generateotp","/forgotpassword/validatingotp")
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+        http.authorizeHttpRequests(request->request.requestMatchers("/register","/login","/forgotpassword/generateotp","/forgotpassword/validatingotp","/chat/**","/app/**","/topic/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated());
@@ -57,21 +64,29 @@ public SecurityFilterChain securityFilterChain (HttpSecurity http){
 
         http.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        http.httpBasic(Customizer.withDefaults());
-    System.out.println("Security filter chain method is working:");
+
+
     return http.build();
 }
     @Bean
     public BCryptPasswordEncoder PasswordEncoder(){
         return  new BCryptPasswordEncoder(12);
     }
-//    @Bean
-//    public PhoneNumberUtil phoneNumberUtil(){
-//        return  PhoneNumberUtil.getInstance();
-//    }
 
-@Bean
-    public  String generateOtp(){
-        return null;
-}
+
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+        config.setAllowedMethods(List.of("*"));
+        config.setAllowCredentials(true);
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Set-Cookie"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }

@@ -24,7 +24,7 @@ public class USerIdUtilMethods {
         UserIdPojoClass userId = newUserID.findByMobileNo(mobileNo);
 //        Map<String,Boolean> userIdMap=Map.of("UserId",userId.getExternalUserID(),"firstLogin:",userId.isFirstlogin());
 
-        return Map.of("UserId",userId.getExternalUserID(),"FirstLogin",userId.isFirstlogin());
+        return Map.of("UserId",userId.getExternalUserID());
     }
     public String getUserMobileNo(String userId){
         UserIdPojoClass mobileNo=newUserID.findByexternalUserID(userId);
@@ -40,6 +40,15 @@ public class USerIdUtilMethods {
         UserIdPojoClass userID=newUserID.findByMobileNo(contactNO);
         if(userID==null) return "This Person don't use our app,Kindly invite them on our app:";
         else return userID.getExternalUserID();
+    }
+public UserIdPojoClass isFirstLogin(String mobileNO){
+        UserIdPojoClass firstLogin=newUserID.findByMobileNo(mobileNO);
+    if (firstLogin.isFirstlogin()) return firstLogin;
+    return null;
+}
+public boolean updatedUserID(UserIdPojoClass updatedUser){
+        newUserID.save(updatedUser);
+        return  true;
     }
 
 }

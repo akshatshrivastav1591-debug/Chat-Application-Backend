@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
 @RestController
 public class UserContactsController {
     @Autowired
@@ -17,6 +17,7 @@ public class UserContactsController {
     }
 @GetMapping("/getAllContacts")
 public ResponseEntity<?> getAllContacts(){
+
         return contactsService.getAllContacts();
     }
 @PutMapping("/updateContact")

@@ -22,25 +22,11 @@ public class JwtFilterServiceClass {
     @Value("${jwt.secret}")
     private String secretKey;
 
-//    public  JwtFilterServiceClass(){
-//        secretKey=generateSecretKey();
-//    }
-//
-//    private String generateSecretKey() {
-//        try {
-//            KeyGenerator keygen=KeyGenerator.getInstance("HmacSHA256");
-//            SecretKey secretKey1=keygen.generateKey();
-//            System.out.println("Secret key:"+Base64.getEncoder().encodeToString(secretKey1.getEncoded()));
-//            return Base64.getEncoder().encodeToString(secretKey1.getEncoded());
-//        } catch (NoSuchAlgorithmException e) {
-//            throw new RuntimeException("error generating key:",e);
-//
-//        }
-//    }
-    public  String getJwtTokens(String username,String externalUserID,boolean isFirstLogin){
+
+    public  String getJwtTokens(String username,String externalUserID){
         Map<String,Object> claims=new HashMap<>();
         claims.put("userID",externalUserID);
-        claims.put("isFirstLogin",isFirstLogin);
+
         return Jwts.builder()
                 .claims()
                 .empty()
@@ -66,13 +52,19 @@ public class JwtFilterServiceClass {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
+        try {
 
+
+            return Jwts.parser()
+                    .verifyWith(getKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        }catch (Exception e){
+
+            throw new RuntimeException(e.getLocalizedMessage());
+        }
+    }
     public String extractUserName(String token) {
 
         return extractClaims(token,Claims::getSubject);
@@ -88,9 +80,7 @@ public class JwtFilterServiceClass {
         return extractClaims(token,claims -> claims.get("userID",String.class));
     }
 
-    public  boolean extractIsFirstLogin(String token){
-        return  extractClaims(token,claims -> claims.get("isFirstLogin",Boolean.class));
-    }
+
     private boolean isTokenExpired(String token) {
         return  extractExpiration(token).before(new Date());
     }

@@ -12,5 +12,8 @@ import lombok.NoArgsConstructor;
 public class UserContactDtoClass {
     private String profilePhotoUrl;
     private  String savedName;
+    private Long roomId;
+     private String savedUserContactNo;
+     private String contactUserId;
 
 }

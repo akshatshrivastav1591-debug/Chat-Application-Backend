@@ -19,7 +19,7 @@ public class UserIdPojoClass {
     private  String mobileNo;
     @Column(unique = true)
     private  String externalUserID;
-private  boolean firstlogin;
+    private  boolean firstlogin;
   @PrePersist
     public void generateExternalUSerID(){
       this.externalUserID= UUID.randomUUID().toString();

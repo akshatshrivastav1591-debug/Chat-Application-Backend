@@ -14,4 +14,5 @@ public class UserSecurityPojoClass {
     @Id
     private  String mobileno;
     private  String password;
+
 }

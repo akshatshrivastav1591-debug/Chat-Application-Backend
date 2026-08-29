@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 public class PhoneNumberFormatter {
     PhoneNumberUtil util;
   public  PhoneNumberFormatter(){
-
        util=PhoneNumberUtil.getInstance();
   }
     private  boolean IsEmpty(UserSecurityPojoClass user) {
@@ -21,21 +20,22 @@ public class PhoneNumberFormatter {
 
 
     public String authenticateMobileNumber(UserSecurityPojoClass userdata){
-        if(IsEmpty(userdata)){
-            return "please enter all the credentials:";
+        if (userdata.getMobileno() == null || userdata.getPassword() == null ||
+                userdata.getMobileno().isBlank() || userdata.getPassword().isBlank()) {
+            return null;
         }
         else{
             try {
                 Phonenumber.PhoneNumber number=util.parse(userdata.getMobileno(),"IN");
                 String formatedphone=util.format(number,PhoneNumberUtil.PhoneNumberFormat.E164);
                 if(!util.isValidNumber(number))
-                    return "Invalid Phone Number";
+                    return null;
                 else{
                     return formatedphone;
                 }
             } catch (NumberParseException e) {
-                System.out.println(e.getLocalizedMessage());
-                return "Mobile Numbers Can't contains other values:";
+
+                return null;
             }
 
 
@@ -52,7 +52,7 @@ public class PhoneNumberFormatter {
             Phonenumber.PhoneNumber number=util.parse(userdata.getMobileno(),"IN");
             return  util.format(number,PhoneNumberUtil.PhoneNumberFormat.E164);
         } catch (NumberParseException e) {
-            System.out.println(e.getLocalizedMessage());
+
             return "Mobile Numbers Can't contains other values:";
         }
   }
@@ -69,7 +69,7 @@ public class PhoneNumberFormatter {
                   return "Invalid Number";
               }
           }catch (NumberParseException e){
-              System.out.println(e.getLocalizedMessage());
+
               return "Please enter correct contactNumber:";
           }
       }

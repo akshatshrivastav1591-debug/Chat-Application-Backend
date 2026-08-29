@@ -1,5 +1,4 @@
-package com.Project1.ChatApplication.Security.OtpVerification.UserOtpVerificationPojo;
-
+package com.Project1.ChatApplication.EmailBasedFeatures;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,19 +6,20 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 
-@Data
 @Entity
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OtpVerificationPojoClass {
-
+public class MailTransferPojoClass {
     @Id
-    private String mobileno;
-    private String  otp;
-    private LocalDateTime expiredtime;
-    private boolean expired;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Long id;
+    private String senderEmailId;
+    private String subject;
+    private String body;
+    private LocalDateTime sentTime;
+
 }

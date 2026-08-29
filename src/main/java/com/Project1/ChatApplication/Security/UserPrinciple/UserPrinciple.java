@@ -15,7 +15,6 @@ public class UserPrinciple implements UserDetails {
     private UserSecurityPojoClass user;
 
     public  UserPrinciple(UserSecurityPojoClass TempUser){
-        System.out.println("User Principle Constructor Called:");
         user=TempUser;
     }
 

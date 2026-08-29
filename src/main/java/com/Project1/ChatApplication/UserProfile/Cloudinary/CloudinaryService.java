@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface CloudinaryService {
-    Map upload(MultipartFile imageFile) throws IOException;
+    Map<Object,Object> uploadImage(MultipartFile imageFile) throws IOException;
+    Map<Object,Object> uploadVideo(MultipartFile videoFile) throws  IOException;
+    Map<Object,Object> uploadRawFile(MultipartFile file) throws  IOException;
 }
 

@@ -39,3 +39,4 @@ out/
 
 #sensitive files
 application-dev.properties
+.env

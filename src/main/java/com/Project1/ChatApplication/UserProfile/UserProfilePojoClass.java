@@ -1,5 +1,6 @@
 package com.Project1.ChatApplication.UserProfile;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,12 @@ public class UserProfilePojoClass {
     private Date birthDate;
     private String address;
     private String imageUrl;
+    @Column(name = "imagepublicid")
+    private String imagePublicId;
+    @Column(name ="imagetype" )
+    private String imageType;
+
+
 }
 
 
