@@ -1,8 +1,9 @@
-# Stage 1: Build the jar using Gradle
-FROM gradle:8-jdk25 AS build
+# Stage 1: Build the jar using the Gradle Wrapper
+FROM eclipse-temurin:25-jdk AS build
 WORKDIR /app
 COPY . .
-RUN gradle build -x test --no-daemon
+RUN chmod +x gradlew
+RUN ./gradlew build -x test --no-daemon
 
 # Stage 2: Run the jar
 FROM eclipse-temurin:25-jdk
