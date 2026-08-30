@@ -70,7 +70,8 @@ PhoneNumberFormatter Numberformatter=new PhoneNumberFormatter();
                                       "; Path=/" +
                                       "; Max-Age=3600" +
                                       "; HttpOnly" +
-                                      "; SameSite=Lax"
+                                      "; SameSite=None"+
+                                      "; Secure"
                               // ✅ No Secure flag — works on HTTP localhost
                       );
                         UserIdPojoClass firstLogin=getUserId.isFirstLogin(formatter);
@@ -109,9 +110,9 @@ public ResponseEntity<?> UserRegister(@RequestBody UserSecurityPojoClass newUser
 
             ResponseCookie cookie = ResponseCookie.from("jwt", "")
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(true)
                     .path("/")
-                    .sameSite("Lax")
+                    .sameSite("None")
                     .maxAge(0)
                     .build();
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
