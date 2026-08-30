@@ -37,9 +37,12 @@ JwtFilterServiceClass jwt;
 PhoneNumberFormatter Numberformatter=new PhoneNumberFormatter();
 
     @GetMapping("/authenticatingJwtToken") //Demo greet Method:
-    public ResponseEntity<Object> DemoGreet(){
+    public ResponseEntity<Object> DemoGreet(@CookieValue(name = "jwt", required = false) String token){
 
-        return ResponseEntity.ok(Map.of("IsAuthenticated","Jwt is authenticated:"));
+        if (token == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Not authenticated"));
+        }
+        return ResponseEntity.ok(Map.of("IsAuthenticated", "Jwt is authenticated:", "wsToken", token));
     }
 
 
