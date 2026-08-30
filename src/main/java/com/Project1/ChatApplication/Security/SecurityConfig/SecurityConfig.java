@@ -56,7 +56,7 @@ public AuthenticationManager authenticationManager(AuthenticationConfiguration c
 public SecurityFilterChain securityFilterChain (HttpSecurity http){
         http.csrf(customizer->customizer.disable());
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-        http.authorizeHttpRequests(request->request.requestMatchers("/register","/authenticatingJwtToken","/login","/forgotpassword/generateotp","/forgotpassword/validatingotp","/chat/**","/app/**","/topic/**")
+        http.authorizeHttpRequests(request->request.requestMatchers("/register","/login","/forgotpassword/generateotp","/forgotpassword/validatingotp","/chat/**","/app/**","/topic/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated());

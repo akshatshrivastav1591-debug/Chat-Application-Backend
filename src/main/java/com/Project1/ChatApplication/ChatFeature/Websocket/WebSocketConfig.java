@@ -3,12 +3,13 @@ package com.Project1.ChatApplication.ChatFeature.Websocket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
-import org.w3c.dom.ls.LSOutput;
+
 
 
 @Configuration
@@ -16,16 +17,19 @@ import org.w3c.dom.ls.LSOutput;
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final WebSocketAuthInterceptor webSocketAuthInterceptor;
+    private final WebSocketChannelInterceptor webSocketChannelInterceptor;
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/chat") // it is a url through which user connect to web socket
-                .setAllowedOriginPatterns("*") // it allowed the requests from the above mentioned url
-                .addInterceptors(webSocketAuthInterceptor)
-                .withSockJS(); //if web socket fails it use http pooling to prevent the app crashing
+                .setAllowedOriginPatterns("*"); // it allowed the requests from the above mentioned url
+//                .addInterceptors(webSocketAuthInterceptor)
+//                .withSockJS(); //if web socket fails it use http pooling to prevent the app crashing
 
     }
-
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(webSocketChannelInterceptor);
+    }
     @Override
     public void configureMessageBroker(MessageBrokerRegistry Config) {
         Config.enableSimpleBroker("/topic"); // it handle the messasging betweeen clinet and server

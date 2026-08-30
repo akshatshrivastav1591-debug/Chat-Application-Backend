@@ -70,16 +70,16 @@ PhoneNumberFormatter Numberformatter=new PhoneNumberFormatter();
                                       "; Path=/" +
                                       "; Max-Age=3600" +
                                       "; HttpOnly" +
-                                      "; SameSite=None"+
+                                      "; SameSite=Lax"+
                                       "; Secure"
                               // ✅ No Secure flag — works on HTTP localhost
                       );
                         UserIdPojoClass firstLogin=getUserId.isFirstLogin(formatter);
-                        if(firstLogin==null)return ResponseEntity.ok(Map.of("message", "WelcomeBack User:","firstLogin",false,"currentUserID",userDetails.get("UserId").toString()));
+                        if(firstLogin==null)return ResponseEntity.ok(Map.of("message", "WelcomeBack User:","firstLogin",false,"currentUserID",userDetails.get("UserId").toString(),"wsToken",token));
                       else{
                           firstLogin.setFirstlogin(false);
                           boolean confirmation=getUserId.updatedUserID(firstLogin);
-                          if(confirmation) return ResponseEntity.ok(Map.of("message","welcome User to the Chatrix App:","firstLogin",true));
+                          if(confirmation) return ResponseEntity.ok(Map.of("message","welcome User to the Chatrix App:","firstLogin",true,"wsToken",token));
                           return   ResponseEntity.status(500).body(Map.of("message","Something wrong with first login:"));
                         }
 
@@ -112,7 +112,7 @@ public ResponseEntity<?> UserRegister(@RequestBody UserSecurityPojoClass newUser
                     .httpOnly(true)
                     .secure(true)
                     .path("/")
-                    .sameSite("None")
+                    .sameSite("Lax")
                     .maxAge(0)
                     .build();
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
